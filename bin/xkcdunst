@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -- junk $(cat ~/.config/xkcd | tr 'A-Z' 'a-z' | dmenu -p xkcd)
+
+shift
+
+if [ $# -eq 0 ]; then
+    exit
+fi
+
+$BROWSER "https://xkcd.com/$(echo $1 | cut -d ' ' -f 1)"
+

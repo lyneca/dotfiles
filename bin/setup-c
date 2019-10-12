@@ -1,0 +1,15 @@
+#!/bin/sh
+if [ $# -ne 2 ]; then
+    echo "Usage: setup_c [project name] [directory name]"
+    exit 1
+fi
+
+cap_name=$(echo $1 | tr 'a-z' 'A-Z')
+
+mkdir -p $2/src
+echo -e "#include <stdio.h>\n#include \"$1.h\"\n\nint main() {\n\treturn 0;\n}" > $2/src/$1.c
+echo -e "#ifndef $cap_name""_H\n#define $cap_name""_H\n\n#endif" > $2/src/$1.h
+echo "gcc $1.c -g -fsanitize=address -o $1" > $2/compile
+echo "./compile && ./$1" > $2/run
+chmod +x $2/compile
+chmod +x $2/run

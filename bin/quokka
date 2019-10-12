@@ -1,0 +1,18 @@
+#!/bin/bash
+
+text=$(echo | dmenu -p text | fold -sw 20)
+shear=$((($RANDOM % 5 - 2) * 5))
+randx=$(($RANDOM % 60 - 30))
+
+if [ ! -n "$text" ]; then
+    exit
+fi
+
+convert .local/share/quokka.jpeg \
+    -fill white \
+    -font 'Inconsolata-Regular' \
+    -pointsize 50 \
+    -gravity center \
+    -annotate "$shear"x"$shear"+$randx-200 \
+    "$text" png:- | xclip -selection clipboard -t image/png
+

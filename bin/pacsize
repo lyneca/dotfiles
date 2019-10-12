@@ -1,0 +1,9 @@
+#!/bin/bash
+function getsize() {
+    pacman -Qi $1 | grep -P "Name|Size" | sed -E 's/(Name|Installed Size)\s*:\s*//' | sed 's/ //1' | xargs echo
+}
+
+packages=$(pacman -Q | cut -d ' ' -f 1)
+for package in $packages; do
+    getsize $package;
+done | sort -hk 2 | tail -n 50

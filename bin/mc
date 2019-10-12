@@ -1,0 +1,97 @@
+#!/bin/bash
+
+INSTANCE="i-00ce502157e382dce"
+USER=ubuntu
+KEY=~/.ssh/minecraft-aus.pem
+
+function status() {
+    aws ec2 describe-instances --instance-ids $INSTANCE \
+        | grep "\"$1\"" \
+        | head -n 1 \
+        | tr -d ' ",' \
+        | sed "s/$1:/$2: /g"
+}
+
+function getDNS() {
+    aws ec2 describe-instances --instance-ids $INSTANCE \
+        | grep PublicDnsName \
+        | head -n 1 \
+        | tr -s ' ' \
+        | cut -d ' ' -f 3 \
+        | tr -d '",'
+}
+
+function mc_ssh() {
+    DNS=$(getDNS)
+    ssh -i $KEY $USER@$DNS $@
+}
+
+function mc_sftp() {
+    shift
+    DNS=$(getDNS)
+    sftp -i $KEY $USER@$DNS $@
+}
+
+function reload() {
+    echo ":: Restarting server..."
+    mc_ssh  "sudo systemctl restart minecraft.service"
+    echo ":: Done."
+}
+
+function mc_pushserver() {
+    shift
+    DNS=$(getDNS)
+
+    echo ":: Creating instance directory..."
+    mc_ssh "mkdir $2; cp ops.json $2; cp eula.txt $2; cp start.sh $2; echo \"$2\" > instance"
+
+    echo ":: Uploading server file..."
+    scp -i $KEY $1 $USER@$DNS:~/$2
+
+    case $1 in
+        *.zip) echo ":: Unzipping server file..."; mc_ssh "cd $2; unzip $1" ;;
+        *.jar) echo ":: Renaming server file to server.jar..."; mc_ssh "cd $2; mv $1 server.jar"
+    esac
+
+    reload
+}
+
+function mc_setserver() {
+    shift
+    DNS=$(getDNS)
+
+    mc_ssh "echo \"$1\" > instance"
+    echo ":: Set server to $1"
+
+    reload
+}
+
+function mc_log() {
+    mc_ssh "journalctl -fu minecraft"  
+}
+
+function mc_list() {
+    DNS=$(getDNS)
+    ssh -i $KEY $USER@$DNS $@ "ls -d */ | tr -d / | sed 's/^/- /g'"
+}
+
+if [ ! "$1" ]; then
+    status Name status
+fi
+
+case $1 in
+    start)  aws ec2 start-instances --instance-id=$INSTANCE | json2yaml ;;
+    stop)   aws ec2 stop-instances --instance-id=$INSTANCE | json2yaml ;;
+    reboot) aws ec2 reboot-instances --instance-id=$INSTANCE ;;
+    ip) status PublicIpAddress ip ;;
+    describe) aws ec2 describe-instances --instance-id=$INSTANCE | json2yaml ;;
+    status) status Name status ;;
+    ssh) shift && mc_ssh $@ ;;
+    sftp) mc_sftp $@ ;;
+    push) mc_pushserver $@ ;;
+    reload) reload $@ ;;
+    set) mc_setserver $@ ;;
+    log) mc_log $@ ;;
+    list) mc_list ;;
+esac
+

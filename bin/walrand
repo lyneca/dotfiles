@@ -1,0 +1,4 @@
+wal -c
+IFS="+"
+echo "$*"
+curl -L "https://source.unsplash.com/random/1920x1080/?$*" > out.png && wal -i out.png

@@ -1,0 +1,12 @@
+#!/bin/bash
+
+set -- junk $(cat ~/.config/sites | dmenu -p open)
+
+shift
+
+if [ $# -eq 0 ]; then
+    exit
+fi
+
+$BROWSER "$1"
+

@@ -1,0 +1,62 @@
+#!/bin/bash
+
+. $HOME/.cache/wal/colors.sh
+
+function color() {
+    echo "%{F$2}%{T4}$1%{T-}%{F-}"
+}
+
+DISABLED_COLOR=$color2
+DISCONNECT_COLOR=$color3
+ACTIVE_COLOR=$color4
+
+NO_POWER="$(color ' [disabled]' $DISABLED_COLOR)"
+NO_CONNECT="$(color ' [no device]' $DISCONNECT_COLOR)"
+CONNECT_PREFIX="$(color  $ACTIVE_COLOR)"
+
+TOGGLE_CLICK="%{A:bluemenu:}"
+TOGGLE_CLICK_END="%{A}"
+
+function rungrep() {
+    bluetoothctl -- $1 2>&1 | grep -q "$2"
+}
+
+function run() {
+    bluetoothctl -- $@
+}
+
+function polyecho() {
+    echo $TOGGLE_CLICK$@$TOGGLE_CLICK_END
+}
+
+if [ "$1" == "stat" ]; then
+    if (rungrep "show" "Powered: no"); then
+        echo "Power off";
+    elif (rungrep "info" "^Missing device address argument$"); then
+        echo "No connection"
+    else
+        name="$(bluetoothctl -- info | grep 'Alias: ' | sed -e 's/\s\+Alias: //')"
+        echo "Connected to $name"
+    fi
+elif [ "$1" == "toggle" ]; then
+    if (rungrep "show" "Powered: no"); then
+        run "power on"
+    elif (rungrep "show" "Powered: yes"); then
+        run "power off"
+    fi
+    exit 0;
+elif [ "$1" == "poly" ]; then
+    if (rungrep "show" "Powered: no"); then
+        polyecho $NO_POWER
+        exit 0;
+    fi
+    if (rungrep "info" "^Missing device address argument$"); then
+        polyecho $NO_CONNECT
+        exit 0;
+    else
+        name="$(bluetoothctl -- info | grep 'Alias: ' | sed -e 's/\s\+Alias: //')"
+        polyecho $CONNECT_PREFIX $(color "$name" $ACTIVE_COLOR)
+    fi
+else
+    run "$@"
+fi

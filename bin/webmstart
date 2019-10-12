@@ -1,0 +1,13 @@
+#!/bin/bash
+slop_output=$(slop -lc 0.819,0.686,0.447,0.1)
+pos=":0.0$(echo $slop_output | sed 's/[[:digit:]]\+x[[:digit:]]\+//;s/+/,/g;s/,/+/')"
+size="$(echo $slop_output | sed 's/+[[:digit:]]\++[[:digit:]]\+//')"
+
+echo Size: $size
+echo Pos:  $pos
+
+filename="$HOME/screenrecs/$(date +%DT%T | tr '/' '-').webm"
+ffmpeg -video_size $size -framerate 25 -f x11grab -i $pos $filename &
+echo "$!" > /tmp/webm_pid
+wait
+ln -fs $filename $HOME/screenrecs/latest.webm

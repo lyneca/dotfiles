@@ -1,0 +1,40 @@
+#!/bin/bash
+
+# cull:
+#  go through your packages,
+#  and decide if you _really_ need them.
+
+if [ ! $1 ]; then
+    start_letter="a";
+else
+    start_letter="$1"
+fi
+
+echo ":: Starting from \"$start_letter\"."
+echo "   Type 'y' to mark for removal, or anything else to skip."
+echo
+
+for package in $(pacman -Qeqt | grep -P "^[$start_letter-z]"); do
+    pacman -Qi $package | grep -P "Name|Description|Installed Size"
+    read -sn 1 keep
+    if [ "$keep" = "y" ]; then
+        echo $package >> to_remove
+    fi
+    echo
+done
+
+if [ ! -f to_remove ]; then
+    echo "Nothing to remove."
+    exit
+fi
+
+echo "Listed for removal:"
+cat to_remove
+
+echo "Remove? (yn)"
+echo -n "> "
+read -n 1 remove
+
+if [ "$remove" = "y" ]; then
+    sudo pacman -R $(cat to_remove)
+fi

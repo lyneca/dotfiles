@@ -1,0 +1,8 @@
+#!/bin/bash
+
+# Rebuild Dunst and Dmenu after Pywal runs
+
+(cd $HOME/build/dmenu && make clean && sudo make install)
+
+cat $HOME/.config/dunst/dunstrc.template $HOME/.cache/wal/colors-wal-dunst > $HOME/.config/dunst/dunstrc
+killall dunst

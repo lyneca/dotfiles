@@ -1,0 +1,21 @@
+#!/bin/sh
+if [ ! $1 = "" ]; then
+    sudo su --command="echo $2 > /sys/bus/usb/devices/1-$1/power/control"
+else
+    echo USB Device Power:
+    for i in $(seq 0 5); do
+        file="/sys/bus/usb/devices/1-$i"
+        if [ -d "$file" ]; then
+            if [ -f "$file/power/control" ]; then
+                power=$(cat $file/power/control)
+            fi
+            if [ -f "$file/manufacturer" ]; then
+                manuf=$(cat $file/manufacturer)
+            fi
+            if [ -f "$file/product" ]; then
+                product=$(cat $file/product)
+            fi
+            echo " - device 1-$i: $manuf $product (currently set to $(cat $file/power/control))";
+        fi
+    done
+fi

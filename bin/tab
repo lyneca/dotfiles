@@ -1,0 +1,35 @@
+#!/bin/bash
+
+TAB_FILE=$HOME/.config/.tab_xid
+
+function get_xid() {
+    if [ ! -e $TAB_FILE ]; then
+        echo
+    else
+        cat $TAB_FILE
+    fi
+}
+
+function new() {
+    echo "new"
+    echo $(tabbed -d -c $@) > $TAB_FILE
+    exit 0
+}
+
+function add() {
+    echo "add"
+    xwininfo -tree -root | grep -q $(get_xid)
+    if [ $? -eq 1 -o ! -n "$(get_xid)" ]; then
+        new $@
+    else
+        $@ $(get_xid) &
+    fi
+    exit 0
+}
+
+getopts cn opts
+case $opts in
+    c) close ;;
+    n) new $@ ;;
+    *) add $@ ;;
+esac

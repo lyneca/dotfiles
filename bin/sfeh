@@ -1,0 +1,16 @@
+#!/bin/zsh
+size=$(identify $1 | cut -d ' ' -f 3)
+
+width=$(echo $size | cut -d 'x' -f 1)
+height=$(echo $size | cut -d 'x' -f 2)
+
+if [ $width -lt 600 ]; then
+    feh $@
+    exit;
+fi
+
+new_height=$(printf "%.0f\n" $(( 600.0 / $width * $height )))
+
+echo 600x$new_height
+feh --scale-down --auto-zoom -g 600x$new_height $@
+

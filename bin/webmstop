@@ -1,0 +1,2 @@
+kill -INT $(cat /tmp/webm_pid)
+rm /tmp/webm_pid

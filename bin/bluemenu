@@ -1,0 +1,27 @@
+#!/bin/bash
+
+powered=$(blue show | grep "Powered:" | cut -d ' ' -f 2)
+if [ "$powered" = "no" ]; then
+    blue power on
+fi
+
+device=$(blue paired-devices \
+    | cut -d ' ' -f 3- \
+    | sed '$a\Turn off' \
+    | dmenu -i -p "Toggle connection:")
+
+if [ ! -n "$device" ]; then exit 0; fi
+
+if [ "$device" = "Turn off" ]; then
+    blue power off
+fi
+
+mac=$(blue devices \
+    | grep "$device" \
+    | cut -d ' ' -f 2)
+
+if [ "$(blue info | grep "Connected:" | cut -d ' ' -f 2)" = "yes" ]; then
+    blue disconnect $mac
+else
+    blue connect $mac
+fi

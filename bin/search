@@ -1,0 +1,37 @@
+#!/bin/bash
+
+set -- junk `echo -n | dmenu -p search`
+
+shift
+
+type=$1
+
+if [ $# -eq 0 ]; then
+    exit
+fi
+case $type in 
+":g")
+    shift
+    query=`echo $@ | tr ' ' '+'`
+    $BROWSER "https://google.com/search?q=$query"
+    ;;
+":w")
+    shift
+    query=`echo $@ | tr ' ' '+'`
+    $BROWSER "https://en.wikipedia.org/w/index.php?search=$query&title=Special%3ASearch&go=Go"
+    ;;
+":a")
+    shift
+    query=`echo $@ | tr ' ' '+'`
+    $BROWSER "https://wiki.archlinux.org/index.php?search=$query&title=Special%3ASearch&go=Go"
+    ;;
+":s")
+    shift
+    query=`echo $@ | tr ' ' '+'`
+    $BROWSER "https://stackoverflow.com/search?q=$query"
+    ;;
+*)
+    query=`echo $@ | tr ' ' '+'`
+    $BROWSER "https://google.com/search?q=$query"
+    ;;
+esac

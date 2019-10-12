@@ -1,0 +1,8 @@
+#!/bin/bash
+
+mtype=$(xclip -selection clipboard -out | xargs file -i | sed 's/.\+: \(\w\+\/\w\+\).\+/\1/g')
+
+echo $mtype
+echo $(xclip -selection clipboard -out)
+
+cat $(xclip -selection clipboard -out) | xclip -selection clipboard -t $mtype

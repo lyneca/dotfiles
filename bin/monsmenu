@@ -1,0 +1,18 @@
+#!/bin/bash
+
+prompt="$(cat <<EOF
+primary only: mons -o
+secondary only: mons -s
+duplicate: mons -d
+mirror: mons -m
+extend left: mons -e left
+extend right: mons -e right
+extend top: mons -e top
+extend bottom: mons -e bottom
+EOF
+)"
+
+choice=$(echo "$prompt" | sed -e 's/:.\+//' | dmenu -p "Monitor:")
+dmenu_command=$(echo "$prompt" | grep "$choice" | sed -e 's/.\+: //')
+
+$dmenu_command

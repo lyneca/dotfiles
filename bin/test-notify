@@ -1,0 +1,4 @@
+#!/bin/bash
+notify-send -u low "Low" "Low Priority"
+notify-send "Normal" "Normal Priority"
+notify-send -u critical "Critical" "Critical Priority"

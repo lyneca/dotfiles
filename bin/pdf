@@ -1,0 +1,30 @@
+#!/bin/bash
+
+extensions=(
+    tex_math_dollars
+    emoji
+    latex_macros
+    all_symbols_escapable
+    footnotes
+    superscript
+    subscript
+    strikeout
+    raw_attribute
+    shortcut_reference_links
+    fenced_divs
+    bracketed_spans
+    citations
+)
+
+extensions=$(echo ${extensions[@]} | sed 's/ /+/g')
+
+pandoc \
+    --katex=$HOME/.local/share/katex/ \
+    --self-contained \
+    --from=markdown+$extensions \
+    --file-scope \
+    -t html \
+    --css ~/.local/share/css/homesick.css \
+    -o ${1%.*}.pdf \
+    ${1%.*}.md
+
