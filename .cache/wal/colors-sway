@@ -1,0 +1,21 @@
+set $wallpaper /home/lyneca/Downloads/samuel-ferrara-1527pjeb6jg-unsplash.jpg
+
+set $background #0f1118
+set $foreground #e5d0cb
+
+set $color0 #0f1118
+set $color1 #57698A
+set $color2 #607195
+set $color3 #6D7593
+set $color4 #8A7A8B
+set $color5 #7888A9
+set $color6 #9A97AE
+set $color7 #e5d0cb
+set $color8 #a0918e
+set $color9 #57698A
+set $color10 #607195
+set $color11 #6D7593
+set $color12 #8A7A8B
+set $color13 #7888A9
+set $color14 #9A97AE
+set $color15 #e5d0cb

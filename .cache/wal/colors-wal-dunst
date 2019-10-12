@@ -1,0 +1,16 @@
+[urgency_low]
+    background = "#0f1118"
+    foreground = "#6D7593"
+    timeout = 10
+
+[urgency_normal]
+    background = "#0f1118"
+    foreground = "#607195"
+    timeout = 10
+
+[urgency_critical]
+    background = "#607195"
+    foreground = "#0f1118"
+    timeout = 0
+
+# vim: ft=cfg
