@@ -70,8 +70,8 @@ font-1 = Symbols Nerd Font:size=10:antialias=true;0
 font-2 = Termsynu:size=8:antialias=false;3
 font-3 = Symbols Nerd Font:size=8:antialias=true;10
 
-modules-left = root home tmp cache
-modules-right = cmus ip cpu memory
+modules-left = root home tmp cache usb
+modules-right = cmus ip cpu temp memory
 
 wm-restack = i3
 
@@ -152,7 +152,7 @@ label-mode-background = ${colors.color06}
 
 label-focused = %name%
 label-focused-foreground = ${colors.color04}
-label-focused-background = ${colors.background}
+; label-focused-background = ${colors.background}
 label-focused-underline = ${colors.color06}
 label-focused-padding = 1
 
@@ -212,7 +212,7 @@ interval = 1
 
 [module/usb]
 type = custom/script
-exec = sh ~/.config/polybar/usbsize.sh /media/usb USB 16000 28000
+exec = sh ~/.config/polybar/usbs.sh
 interval = 1
 
 [module/dots]
@@ -226,6 +226,13 @@ type = custom/script
 exec = sh ~/.config/polybar/todo.sh
 format = <label>
 interval = 1
+
+[module/temp]
+type = custom/script
+exec = sh ~/.config/polybar/temp.sh
+interval = 0.5
+format = TEMP  <label>
+format-foreground = ${colors.color02}
 
 [module/cpu]
 type = internal/cpu

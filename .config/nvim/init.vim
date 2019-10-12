@@ -16,12 +16,15 @@ if dein#load_state('~/.cache/dein')
     " Languages
     call dein#add('cespare/vim-toml')
     call dein#add('rust-lang/rust.vim')
+    call dein#add('racer-rust/vim-racer')
     call dein#add('JulesWang/css.vim')
     call dein#add('sophacles/vim-processing')
     call dein#add('pangloss/vim-javascript')
     call dein#add('vim-scripts/indentpython.vim')
     call dein#add('vim-scripts/java_apidoc.vim')
     call dein#add('PotatoesMaster/i3-vim-syntax')
+    call dein#add('kovisoft/slimv')
+    call dein#add('IN3D/vim-raml')
 
     " Appearance
     call dein#add('lyneca/wal.vim')
@@ -38,6 +41,10 @@ if dein#load_state('~/.cache/dein')
     " Linting
     call dein#add('w0rp/ale')
     call dein#add('maximbaz/lightline-ale')
+
+    " Deoplete
+    call dein#add('Shougo/deoplete.nvim')
+    call dein#add('deoplete-plugins/deoplete-jedi')
 
     " Helpers
     call dein#add('tpope/vim-surround')
@@ -64,6 +71,7 @@ set background=dark
 set backspace=indent,eol,start
 set expandtab
 set fillchars=vert:┃,fold:-
+" set ambiwidth=double
 set foldlevel=99
 set foldmethod=indent
 set guifont=InputMono:h10
@@ -71,6 +79,7 @@ set laststatus=2
 set mouse=a
 set noeb novb t_vb=
 set nowrap
+set linebreak
 set number
 set relativenumber
 set sessionoptions=blank,winsize,tabpages,resize
@@ -81,6 +90,7 @@ set updatetime=750
 
 " Plugin options
 
+let g:deoplete#enable_at_startup = 1
 let g:NERDSpaceDelims = 1
 let g:NERDAltDelims_java = 1
 let g:NERDAltDelims_c = 1
@@ -125,7 +135,13 @@ let g:lightline = {
   \     'linter_ok': 'left',
   \ }
   \ }
+
+let g:ale_virtualenv_dir_names = []
 let g:lightline#ale#indicator_checking = ""
+let s:palette = g:lightline#colorscheme#{g:lightline.colorscheme}#palette
+let s:palette.normal.middle = [ [ 'NONE', 'NONE', 'NONE', 'NONE' ] ]
+let s:palette.inactive.middle = s:palette.normal.middle
+let s:palette.tabline.middle = s:palette.normal.middle
 let g:haskellmode_completion_ghc = -1
 let g:ale_completion_enabled = 0
 let g:ale_linters = {'python': ['pylint'], 'java': ['javac']}
@@ -171,12 +187,14 @@ nmap <silent> <C-k> <Plug>(ale_previous)
 nmap <silent> <C-j> <Plug>(ale_next)
 nmap <silent> <C-n> :put =strftime('%Y-%m-%d %H:%M:%S')<Enter>
 
+nmap g :!mimeopen <CR><CR>
+
 function! OpenSourceFile()
-    let a:name = expand('%:r')
-    if filereadable(a:name . '.c')
-        exec 'tab drop' a:name . '.c'
-    elseif filereadable(a:name . '.cpp')
-        exec 'tab drop' a:name . '.cpp'
+    let name = expand('%:r')
+    if filereadable(name . '.c')
+        exec 'tab drop' name . '.c'
+    elseif filereadable(name . '.cpp')
+        exec 'tab drop' name . '.cpp'
     endif
 endfunction
 
@@ -218,6 +236,8 @@ nmap <leader>hjl a┬<esc>
 nmap <leader>hkl a┴<esc>
 nmap <leader>hjkl a┼<esc>
 
+nmap <leader>w :set wrap!<CR>
+
 function! ToggleAutoTab()
     if exists('b:autotab')
         let b:autotab = !b:autotab
@@ -253,8 +273,11 @@ command! RC execute "tabnew ~/.config/nvim/init.vim"
 
 hi htmlH1 ctermfg=6
 hi NonText ctermbg=none guibg=NONE
+hi EndOfBuffer ctermfg=3
 
 " Autocommands
+
+au BufRead,BufNewFile *.clisp set filetype=lisp
 
 augroup pythonstuff
     au!
@@ -262,7 +285,6 @@ augroup pythonstuff
         \ set tabstop=4 |
         \ set softtabstop=4 |
         \ set shiftwidth=4 |
-        \ set textwidth=79 |
         \ set expandtab |
         \ set fileformat=unix
     au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match SpellBad /\s\+$/
@@ -279,14 +301,30 @@ au FileType html set foldmethod=indent
 
 au FileType rmd map <F5> :!echo<space>"require(rmarkdown);<space>render('<c-r>%')"<space>\|<space>R<space>--vanilla<Enter>
 
+augroup gitcommit
+    au!
+    au BufNewFile,BufRead gitcommit
+                \setlocal spell spelllang=en_au
+augroup END
+
 augroup markdown
     au!
     au BufNewFile,BufRead *.md
-                \ set spell spelllang=en_au |
-                \ set textwidth=79 |
-                \ set shiftwidth=2 |
-                \ set tabstop=2 |
-                \ set softtabstop=2
+                \ setlocal spell spelllang=en_au |
+                \ setlocal shiftwidth=2 |
+                \ setlocal tabstop=2 |
+                \ setlocal softtabstop=2 |
+                \ setlocal wrap |
+                \ setlocal showbreak=\ |
+                \ vmap <buffer> + :s/^\(#\+\)/\1#<CR>
+augroup END
+
+augroup raml
+    au!
+    au BufNewFile,BufRead *.raml
+                \ setlocal shiftwidth=2 |
+                \ setlocal tabstop=2 |
+                \ setlocal softtabstop=2
 augroup END
 
 au FileType rmd,markdown syn region mkdCodeFold
@@ -301,9 +339,22 @@ au FileType rmd,markdown let g:indentLine_enabled=0
 au FileType haskell setlocal omnifunc=necoghc#omnifunc
 au FileType haskell setlocal expandtab
 
+function FormatState()
+    if exists('b:autoformat') && b:autoformat == 1
+        echo "Autoformat on"
+    else
+        echo "Autoformat off"
+    endif
+endfunction
+
+au BufEnter *.c,*.h,*.java,*.cpp,*.cc,*.pde let b:autoformat = 1 |
+            \ nmap <buffer> <leader>b <Cmd> let b:autoformat = !b:autoformat \| call FormatState()<return>
+
 function! Astyle()
-    silent execute '!astyle -n ' shellescape(expand('%'), 1) 
-    edit
+    if exists('b:autoformat') && b:autoformat == 1
+        silent execute '!astyle -n ' shellescape(expand('%'), 1) 
+        edit
+    endif
 endfunction
 
 au BufWritePost *.c,*.h,*.java,*.cpp,*.cc,*.pde call Astyle()

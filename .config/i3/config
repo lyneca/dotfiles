@@ -8,17 +8,18 @@
 
 # Set mod key (Mod1=<Alt>, Mod4=<Super>)
 set $mod Mod4
+set $BROWSER firefox
 
 # set default desktop layout (default is tiling)
 # workspace_layout tabbed <stacking|tabbed>
 
 # Configure border style <normal|1pixel|pixel xx|none|pixel>
-new_window pixel 2
-new_float pixel 2
+new_window pixel 5
+new_float pixel 5
 
 # Hide borders
 hide_edge_borders none
-default_border none
+# default_border none
 
 # change borders
 bindsym $mod+u border pixel 2
@@ -41,8 +42,7 @@ bindsym $mod+Mod1+Pause exec --no-startup-id zenity --question --text "Poweroff?
 bindsym $mod+shift+Pause exec --no-startup-id zenity --question --text "Reboot?" --default-cancel && systemctl reboot
 
 # Lock Screen
-bindsym $mod+Delete exec --no-startup-id betterlockscreen -l
-
+bindsym $mod+Delete exec --no-startup-id betterlockscreen -l dimblur -t "Unlock to access memes"
 # Use Mouse+$mod to drag floating windows
 floating_modifier $mod
 
@@ -104,8 +104,6 @@ bindsym $mod+Shift+Right move right
 
 # workspace back and forth (with/without active container)
 workspace_auto_back_and_forth yes
-bindsym $mod+b workspace back_and_forth
-bindsym $mod+Shift+b move container to workspace back_and_forth; workspace back_and_forth
 
 # split orientation
 bindsym $mod+backslash split h
@@ -156,7 +154,7 @@ bindsym --release $mod+Insert       exec webm -f
 bindsym --release $mod+Shift+Insert exec webm
 bindsym --release $mod+Mod1+Insert  exec webm -p
 
-bindsym $mod+w exec google-chrome-beta
+bindsym $mod+w exec $BROWSER
 bindsym $mod+g exec --no-startup-id search
 bindsym $mod+o exec --no-startup-id sites
 bindsym $mod+shift+o exec --no-startup-id app
@@ -226,6 +224,7 @@ bindsym $mod+Shift+6 move container to workspace $ws6; workspace $ws6
 bindsym $mod+Shift+7 move container to workspace $ws7; workspace $ws7
 bindsym $mod+Shift+8 move container to workspace $ws8; workspace $ws8
 
+bindsym $mod+b exec --no-startup-id bluemenu
 
 # Open applications on specific workspaces
 # assign [class="Slack"] $ws5
@@ -234,11 +233,15 @@ bindsym $mod+Shift+8 move container to workspace $ws8; workspace $ws8
 for_window [instance="rofi"] border none 
 for_window [instance="surf"] border pixel 2
 for_window [class="Thunar"] border none 
-for_window [instance="kitty"] border pixel 2 
-for_window [instance="kitty" title="floating"] floating enable; border pixel 2; resize set 600 px 400 px; move window position $(((1920/2) - 300)) $(((1080/2) - 200))
+for_window [class="Google-chrome-beta"] border none 
+for_window [class="Dunst"] border pixel 5 
+for_window [instance="kitty"] border pixel 5 
+for_window [instance="kitty" title="floating"] floating enable; border pixel 5; resize set 600 px 400 px; move window position $(((1920/2) - 300)) $(((1080/2) - 200))
 for_window [title="alsamixer"] floating enable border pixel 1
+for_window [class="feh"] floating enable
 # for_window [title="GitKraken"] floating enable 
 for_window [class="GParted"] floating enable border normal
+for_window [class="openssh-askpass"] floating enable border pixel 5
 for_window [title="i3_help"] floating enable sticky enable border normal
 for_window [class="Lightdm-gtk-greeter-settings"] floating enable
 for_window [class="Lxappearance"] floating enable sticky enable border normal
@@ -250,6 +253,8 @@ for_window [class="(?i)virtualbox"] floating enable border normal
 for_window [class="Xfburn"] floating enable
 for_window [class="Firefox"] border none
 for_window [class="discord"] floating enable border none
+for_window [class="SimpleScreenRecorder"] floating enable
+for_window [class="Polybar"] border none
 # switch to workspace with urgent window automatically
 for_window [urgent=latest] focus
 
@@ -372,8 +377,8 @@ gaps outer 0
 # from the generated scheme.
 # NOTE: The '#f0f0f0' in the lines below is the color i3 will use if
 # it fails to get colors from Xresources.
-set_from_resource $fg color2 #f0f0f0
-set_from_resource $bg color0 #f0f0f0
+set_from_resource $fg color0 #f0f0f0
+set_from_resource $bg color2 #f0f0f0
 set_from_resource $hi color3 #f0f0f0
 
 # class                 border  backgr. text indicator child_border
@@ -393,7 +398,7 @@ bindsym $mod+d exec --no-startup-id j4-dmenu-desktop
 # client.background	$background
 
 # class                 border  	backgr. 	text    	indic.  	child_border
-# client.focused         	#202020	$background	$foreground	$background	$background	
+# client.focused         	#FFFFFF	$background	$foreground	$background	$background	
 # client.unfocused       	$background	$background	$foreground	$background	$background
 # client.focused_inactive	$background	$background	$foreground	$background	$background
 # client.urgent		    $background	$background	$foreground	$background	$background
@@ -403,4 +408,4 @@ bindsym $mod+d exec --no-startup-id j4-dmenu-desktop
 bindsym XF86AudioRaiseVolume exec --no-startup-id amixer set Master 5%+
 bindsym XF86AudioLowerVolume exec --no-startup-id amixer set Master 5%-
 bindsym XF86AudioMute exec --no-startup-id amixer set Master 1+ toggle
-# exec_always --no-startup-id start_conky
+exec_always --no-startup-id conky
