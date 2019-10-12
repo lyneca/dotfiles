@@ -1,0 +1,24 @@
+# alias sudo="sudo "
+alias gimme="pacman -S" 
+alias nuke="pacman -R" 
+alias update="pacman -Syu"
+alias oops='sudo $(fc -ln -1)'
+alias please='sudo '
+alias venv="python3 -m venv "
+alias cfg='/usr/bin/hub --git-dir=$HOME/.cfg/ --work-tree=$HOME'
+alias vim=nvim
+alias mutt='neomutt'
+alias ls="ls --color"
+alias ll="ls -l"
+alias la="ls -a"
+alias l="ls"
+alias git="hub "
+alias 🖕="sudo "
+alias walc="cat ~/.cache/wal/sequences"
+alias up="TERM=xterm up "
+alias chrome="google-chrome-beta "
+alias tz="tabbed -c zathura -e &"
+alias o="mimeopen "
+alias dz="disown %zathura"
+
+alias git_current_branch="git branch | grep \* | sed 's/\* //g'"

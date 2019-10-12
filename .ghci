@@ -1,0 +1,3 @@
+:set editor nvim
+:set prompt "%s > λ " 
+:set prompt "\n\ESC[1;34m%s\n\ESC[0;34mλ \ESC[m"

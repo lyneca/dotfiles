@@ -1,0 +1,7 @@
+--style=google
+--pad-oper
+--pad-header
+--unpad-paren
+--indent-namespaces
+--indent-col1-comments
+--indent-cases

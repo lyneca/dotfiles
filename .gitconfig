@@ -1,0 +1,11 @@
+[user]
+	email = lukemtuthill@gmail.com
+	name = Luke Tuthill
+[alias]
+	alias = --list
+[core]
+	editor = nvim
+[push]
+	default = upstream
+[commit]
+	gpgsign = true
