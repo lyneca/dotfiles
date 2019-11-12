@@ -58,6 +58,8 @@ bindsym $mod+Shift+q kill
 # bindsym $mod+d exec --no-startup-id rofi -show run -sidebar-mode -location 2 -yoffset 100 -run-list-command ". ~/bin/list_aliases.sh" -run-command "/bin/bash -i -c '{cmd}'" -rnow
 bindsym $mod+Tab exec --no-startup-id rofi -show window -sidebar-mode -location 2 -yoffset 100 -rnow
 
+bindsym XF86Search exec --no-startup-id search
+
 # bindsym XF86WLAN exec --no-startup-id networkmanager_dmenu
 # bindcode 247 exec --no-startup-id networkmanager_dmenu
 # launch categorized menu
@@ -139,10 +141,15 @@ bindsym $mod+Shift+slash move scratchpad
 bindsym $mod+grave scratchpad show
 
 #navigate workspaces next / previous
+bindsym $mod+Ctrl+l workspace next
+bindsym $mod+Ctrl+h workspace prev
+
 bindsym $mod+Ctrl+Right workspace next
 bindsym $mod+Ctrl+Left workspace prev
 
 bindsym $mod+Shift+d exec duck
+
+bindsym $mod+Shift+m exec kc -s
 
 bindsym --release Print             exec scr
 bindsym --release Ctrl+Print        exec scr -c
@@ -352,6 +359,10 @@ exec_always --no-startup-id $HOME/.config/polybar/launch.sh
 # i3-gaps
 gaps inner 35
 gaps outer 0
+
+# rounded corners
+
+border_radius 4
 
 # smart_gaps on
 # smart_borders on

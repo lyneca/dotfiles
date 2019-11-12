@@ -1,5 +1,5 @@
 # Path to your antigen installation.
-cat ~/.cache/wal/sequences
+[[ ! $- != *i* ]] && cat ~/.cache/wal/sequences
 
 source /usr/share/zsh/share/antigen.zsh
 
