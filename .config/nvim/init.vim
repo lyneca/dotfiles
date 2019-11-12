@@ -1,65 +1,55 @@
-if &compatible
-  set nocompatible
-endif
+" set the runtime path to include Vundle and initialize
+call plug#begin(stdpath('data') . '/plugged')
 
-" Add the dein installation directory into runtimepath
-set runtimepath+=~/.cache/dein/repos/github.com/Shougo/dein.vim
+" Languages
+Plug 'cespare/vim-toml'
+Plug 'rust-lang/rust.vim'
+Plug 'racer-rust/vim-racer'
+Plug 'JulesWang/css.vim'
+Plug 'sophacles/vim-processing'
+Plug 'pangloss/vim-javascript'
+Plug 'vim-scripts/indentpython.vim'
+Plug 'vim-scripts/java_apidoc.vim'
+Plug 'PotatoesMaster/i3-vim-syntax'
+Plug 'kovisoft/slimv'
+Plug 'IN3D/vim-raml'
+Plug 'SidOfc/mkdx'
+Plug 'souffle-lang/souffle.vim'
 
-if dein#load_state('~/.cache/dein')
-    call dein#begin('~/.cache/dein')
+" Appearance
+Plug 'lyneca/wal.vim'
+Plug 'itchyny/lightline.vim'
+Plug 'junegunn/goyo.vim'
+Plug 'yggdroot/indentline'
 
-    call dein#add('~/.cache/dein')
+" External Extensions
+Plug 'tpope/vim-fugitive'
+Plug 'airblade/vim-gitgutter'
+Plug 'ervandew/supertab'
+Plug 'ctrlpvim/ctrlp.vim'
 
-    " Dein UI
-    call dein#add('wsdjeg/dein-ui.vim')
-   
-    " Languages
-    call dein#add('cespare/vim-toml')
-    call dein#add('rust-lang/rust.vim')
-    call dein#add('racer-rust/vim-racer')
-    call dein#add('JulesWang/css.vim')
-    call dein#add('sophacles/vim-processing')
-    call dein#add('pangloss/vim-javascript')
-    call dein#add('vim-scripts/indentpython.vim')
-    call dein#add('vim-scripts/java_apidoc.vim')
-    call dein#add('PotatoesMaster/i3-vim-syntax')
-    call dein#add('kovisoft/slimv')
-    call dein#add('IN3D/vim-raml')
+" Linting
+Plug 'w0rp/ale'
+Plug 'maximbaz/lightline-ale'
 
-    " Appearance
-    call dein#add('lyneca/wal.vim')
-    call dein#add('itchyny/lightline.vim')
-    call dein#add('junegunn/goyo.vim')
-    call dein#add('yggdroot/indentline')
+" Deoplete
+Plug 'Shougo/deoplete.nvim'
+Plug 'deoplete-plugins/deoplete-jedi'
 
-    " External Extensions
-    call dein#add('tpope/vim-fugitive')
-    call dein#add('airblade/vim-gitgutter')
-    call dein#add('ervandew/supertab')
-    call dein#add('ctrlpvim/ctrlp.vim')
+" Helpers
+Plug 'tpope/vim-surround'
+Plug 'mattn/emmet-vim'
+Plug 'scrooloose/nerdcommenter'
+Plug 'godlygeek/tabular'
 
-    " Linting
-    call dein#add('w0rp/ale')
-    call dein#add('maximbaz/lightline-ale')
+call plug#end()            " required
 
-    " Deoplete
-    call dein#add('Shougo/deoplete.nvim')
-    call dein#add('deoplete-plugins/deoplete-jedi')
+let g:mkdx#settings   = { 'highlight': { 'enable': 1 },
+                        \ 'enter': { 'shift': 1 },
+                        \ 'links': { 'external': { 'enable': 1 } },
+                        \ 'toc': { 'text': 'Table of Contents', 'update_on_write': 1 },
+                        \ 'fold': { 'enable': 1 } }
 
-    " Helpers
-    call dein#add('tpope/vim-surround')
-    call dein#add('mattn/emmet-vim')
-    call dein#add('scrooloose/nerdcommenter')
-    call dein#add('godlygeek/tabular')
-
-    call dein#add('plasticboy/vim-markdown')
-
-    " Useless shit
-    call dein#add('dixonary/vimty')
-    
-    call dein#end()
-    call dein#save_state()
-endif
 
 filetype plugin indent on
 syntax enable
@@ -164,7 +154,8 @@ let g:surround_{char2nr('c')} = "\\\1command\1{\r}"
 
 " Remaps
 
-nnoremap <space> za
+
+nmap <space> <Plug>(mkdx-checkbox-prev-n)
 nnoremap <esc> :noh<return><esc>
 
 " Don't need these arrow keys
@@ -266,6 +257,7 @@ colorscheme wal
 
 " Commands
 command! Pdf execute "!pdf %"
+command! BgPdf silent call jobstart('pdf '.expand('%'))
 command! -nargs=1 C execute "tabnew <args>.c | vnew <args>.h | wincmd r | wincmd h"
 command! RC execute "tabnew ~/.config/nvim/init.vim"
 
@@ -274,6 +266,9 @@ command! RC execute "tabnew ~/.config/nvim/init.vim"
 hi htmlH1 ctermfg=6
 hi NonText ctermbg=none guibg=NONE
 hi EndOfBuffer ctermfg=3
+hi CocFloating ctermbg=0
+hi Pmenu ctermbg=0
+hi VertSplit ctermbg=NONE
 
 " Autocommands
 
@@ -307,6 +302,15 @@ augroup gitcommit
                 \setlocal spell spelllang=en_au
 augroup END
 
+function! ToggleCheckbox()
+    let b:line=getline('.')
+    if b:line =~ "^- [ ]"
+        call setline('.', substitute(b:line, '^- [ ]', '- [x]'))
+    elseif b:line =~ "^- [x]"
+        call setline('.', substitute(b:line, '^- [x]', '- [ ]'))
+    endif
+endfunction
+
 augroup markdown
     au!
     au BufNewFile,BufRead *.md
@@ -316,7 +320,7 @@ augroup markdown
                 \ setlocal softtabstop=2 |
                 \ setlocal wrap |
                 \ setlocal showbreak=\ |
-                \ vmap <buffer> + :s/^\(#\+\)/\1#<CR>
+                \ call deoplete#custom#buffer_option('auto_complete', v:false)
 augroup END
 
 augroup raml
@@ -326,6 +330,8 @@ augroup raml
                 \ setlocal tabstop=2 |
                 \ setlocal softtabstop=2
 augroup END
+
+autocmd InsertLeave,CompleteDone * if pumvisible() == 0 | pclose | endif
 
 au FileType rmd,markdown syn region mkdCodeFold
         \ start="```"
@@ -349,6 +355,15 @@ endfunction
 
 au BufEnter *.c,*.h,*.java,*.cpp,*.cc,*.pde let b:autoformat = 1 |
             \ nmap <buffer> <leader>b <Cmd> let b:autoformat = !b:autoformat \| call FormatState()<return>
+
+function! AutoPDF()
+    if exists('b:autopdf') && b:autopdf == 1
+        silent execute 'BgPdf'
+    endif
+endfunction
+
+au FileType markdown.autopdf let b:autopdf = 1
+au BufWritePost *.md call AutoPDF()
 
 function! Astyle()
     if exists('b:autoformat') && b:autoformat == 1
