@@ -1,8 +1,19 @@
 " set the runtime path to include Vundle and initialize
 call plug#begin(stdpath('data') . '/plugged')
 
+if exists('g:vscode')
+    Plug 'tpope/vim-surround'
+    call plug#end()            " required
+    nnoremap <esc> :noh<return><esc>
+    nmap <tab> >>
+    vmap <tab> >gv
+    nmap <S-tab> <<
+    vmap <S-tab> <gv
+else
+
 " Languages
 Plug 'cespare/vim-toml'
+Plug 'hashivim/vim-terraform'
 Plug 'rust-lang/rust.vim'
 Plug 'racer-rust/vim-racer'
 Plug 'JulesWang/css.vim'
@@ -15,6 +26,7 @@ Plug 'kovisoft/slimv'
 Plug 'IN3D/vim-raml'
 Plug 'SidOfc/mkdx'
 Plug 'souffle-lang/souffle.vim'
+Plug 'psf/black', { 'branch': 'stable' }
 
 " Appearance
 Plug 'lyneca/wal.vim'
@@ -41,6 +53,7 @@ Plug 'tpope/vim-surround'
 Plug 'mattn/emmet-vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'godlygeek/tabular'
+Plug 'FooSoft/vim-argwrap'
 
 call plug#end()            " required
 
@@ -71,7 +84,6 @@ set noeb novb t_vb=
 set nowrap
 set linebreak
 set number
-set relativenumber
 set sessionoptions=blank,winsize,tabpages,resize
 set shiftwidth=4
 set softtabstop=0
@@ -134,8 +146,10 @@ let s:palette.inactive.middle = s:palette.normal.middle
 let s:palette.tabline.middle = s:palette.normal.middle
 let g:haskellmode_completion_ghc = -1
 let g:ale_completion_enabled = 0
-let g:ale_linters = {'python': ['pylint'], 'java': ['javac']}
+let g:ale_linters = {'python': ['pylint', 'mypy'], 'java': ['javac']}
+let b:ale_linters = ['python', 'mypy']
 let g:ale_python_pylint_options = '--extension-pkg-whitelist=pygame'
+let g:ale_python_mypy_options = '--strict'
 let g:vim_markdown_folding_disabled=0
 let g:vim_markdown_conceal=0
 let g:vim_markdown_math=1
@@ -229,6 +243,8 @@ nmap <leader>hjkl a┼<esc>
 
 nmap <leader>w :set wrap!<CR>
 
+nmap <leader>a :ArgWrap<CR>
+
 function! ToggleAutoTab()
     if exists('b:autotab')
         let b:autotab = !b:autotab
@@ -274,6 +290,7 @@ hi VertSplit ctermbg=NONE
 
 au BufRead,BufNewFile *.clisp set filetype=lisp
 
+" au InsertLeave,BufWritePre *.py execute ':Black'
 augroup pythonstuff
     au!
     au BufNewFile,BufRead *.py
@@ -285,11 +302,11 @@ augroup pythonstuff
     au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match SpellBad /\s\+$/
 augroup END
 
-augroup numbertoggle
-  au!
-  au BufEnter,WinEnter,FocusGained,InsertLeave * set relativenumber
-  au BufLeave,WinLeave,FocusLost,InsertEnter * set norelativenumber
-augroup END
+" augroup numbertoggle
+  " au!
+  " au BufEnter,WinEnter,FocusGained,InsertLeave * set relativenumber
+  " au BufLeave,WinLeave,FocusLost,InsertEnter * set norelativenumber
+" augroup END
 
 au FileType css set foldmethod=syntax
 au FileType html set foldmethod=indent
@@ -375,3 +392,4 @@ endfunction
 au BufWritePost *.c,*.h,*.java,*.cpp,*.cc,*.pde call Astyle()
 
 set conceallevel=0
+endif
