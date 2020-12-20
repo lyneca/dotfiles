@@ -19,6 +19,7 @@ Plug 'racer-rust/vim-racer'
 Plug 'JulesWang/css.vim'
 Plug 'sophacles/vim-processing'
 Plug 'pangloss/vim-javascript'
+Plug 'leafgarland/typescript-vim'
 Plug 'vim-scripts/indentpython.vim'
 Plug 'vim-scripts/java_apidoc.vim'
 Plug 'PotatoesMaster/i3-vim-syntax'
@@ -27,26 +28,24 @@ Plug 'IN3D/vim-raml'
 Plug 'SidOfc/mkdx'
 Plug 'souffle-lang/souffle.vim'
 Plug 'psf/black', { 'branch': 'stable' }
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'elzr/vim-json'
+" Plug 'prabirshrestha/vim-lsp'
+" Plug 'mattn/vim-lsp-settings'
 
 " Appearance
 Plug 'lyneca/wal.vim'
 Plug 'itchyny/lightline.vim'
 Plug 'junegunn/goyo.vim'
-Plug 'yggdroot/indentline'
+"Plug 'yggdroot/indentline'
+Plug 'nathanaelkane/vim-indent-guides'
 
 " External Extensions
 Plug 'tpope/vim-fugitive'
+Plug 'tpope/vim-abolish'
 Plug 'airblade/vim-gitgutter'
 Plug 'ervandew/supertab'
 Plug 'ctrlpvim/ctrlp.vim'
-
-" Linting
-Plug 'w0rp/ale'
-Plug 'maximbaz/lightline-ale'
-
-" Deoplete
-Plug 'Shougo/deoplete.nvim'
-Plug 'deoplete-plugins/deoplete-jedi'
 
 " Helpers
 Plug 'tpope/vim-surround'
@@ -54,6 +53,7 @@ Plug 'mattn/emmet-vim'
 Plug 'scrooloose/nerdcommenter'
 Plug 'godlygeek/tabular'
 Plug 'FooSoft/vim-argwrap'
+Plug 'machakann/vim-swap'
 
 call plug#end()            " required
 
@@ -66,6 +66,22 @@ let g:mkdx#settings   = { 'highlight': { 'enable': 1 },
 
 filetype plugin indent on
 syntax enable
+
+
+
+" netrw config
+
+let g:netrw_liststyle = 3
+let g:netrw_banner = 0
+nmap <C-o> :Texplore<CR>
+nmap <leader>\ :Vexplore<CR>
+
+" Swapfile directory
+set directory^=$HOME/.vim/swapfiles//
+
+" Persistent undos
+set undodir=~/.vim/undodir
+set undofile
 
 set autochdir
 set autoread
@@ -92,12 +108,25 @@ set updatetime=750
 
 " Plugin options
 
+"let g:javascript_conceal_function             = "ƒ"
+"let g:javascript_conceal_null                 = "ø"
+"let g:javascript_conceal_this                 = "@"
+"let g:javascript_conceal_return               = "⇚"
+"let g:javascript_conceal_undefined            = "¿"
+"let g:javascript_conceal_NaN                  = "ℕ"
+"let g:javascript_conceal_prototype            = "¶"
+"let g:javascript_conceal_static               = "•"
+"let g:javascript_conceal_super                = "Ω"
+"let g:javascript_conceal_arrow_function       = "⇒"
+
+let g:SuperTabDefaultCompletionType = "<c-n>"
 let g:deoplete#enable_at_startup = 1
 let g:NERDSpaceDelims = 1
 let g:NERDAltDelims_java = 1
 let g:NERDAltDelims_c = 1
 let g:goyo_height = "98%"
 let g:goyo_linenr = 1
+let g:vim_json_syntax_conceal = 1
 let g:user_emmet_settings = {
   \  'javascript.jsx' : {
     \      'extends' : 'jsx',
@@ -115,41 +144,29 @@ let g:lightline = {
   \     ],
   \     'left': [
   \         [ 'mode', 'paste' ],
-  \         [ 'readonly', 'filename', 'modified' ],
-  \         [
-  \             'linter_checking',
-  \             'linter_errors',
-  \             'linter_warnings',
-  \             'linter_ok'
-  \         ],
+  \         [ 'cocstatus', 'currentfunction', 'readonly', 'filename', 'modified' ]
   \     ],
   \ },
-  \ 'component_expand': {
-  \     'linter_checking': 'lightline#ale#checking',
-  \     'linter_warnings': 'lightline#ale#warnings',
-  \     'linter_errors': 'lightline#ale#errors',
-  \     'linter_ok': 'lightline#ale#ok',
+  \ 'component_function': {
+  \   'cocstatus': 'coc#status',
+  \   'currentfunction': 'CocCurrentFunction'
   \ },
-  \ 'component_type': {
-  \     'linter_checking': 'left',
-  \     'linter_warnings': 'warning',
-  \     'linter_errors': 'error',
-  \     'linter_ok': 'left',
-  \ }
   \ }
 
-let g:ale_virtualenv_dir_names = []
-let g:lightline#ale#indicator_checking = ""
+function! CocCurrentFunction()
+    return get(b:, 'coc_current_function', '')
+endfunction
+
 let s:palette = g:lightline#colorscheme#{g:lightline.colorscheme}#palette
 let s:palette.normal.middle = [ [ 'NONE', 'NONE', 'NONE', 'NONE' ] ]
 let s:palette.inactive.middle = s:palette.normal.middle
 let s:palette.tabline.middle = s:palette.normal.middle
 let g:haskellmode_completion_ghc = -1
-let g:ale_completion_enabled = 0
-let g:ale_linters = {'python': ['pylint', 'mypy'], 'java': ['javac']}
-let b:ale_linters = ['python', 'mypy']
-let g:ale_python_pylint_options = '--extension-pkg-whitelist=pygame'
-let g:ale_python_mypy_options = '--strict'
+" let g:ale_completion_enabled = 0
+" let g:ale_linters = {'python': ['pylint', 'mypy'], 'java': ['javac']}
+" let b:ale_linters = ['python', 'mypy']
+" let g:ale_python_pylint_options = '--extension-pkg-whitelist=pygame'
+" let g:ale_python_mypy_options = '--strict'
 let g:vim_markdown_folding_disabled=0
 let g:vim_markdown_conceal=0
 let g:vim_markdown_math=1
@@ -163,13 +180,70 @@ let g:ctrlp_custom_ignore = {
 	\ 	'file' : '\v\.(o)$'
 	\ }
 
+let g:coc_status_error_sign = 'E '
+let g:coc_status_warning_sign = 'W '
 
 let g:surround_{char2nr('c')} = "\\\1command\1{\r}"
 
+call coc#config('python', {'pythonPath': $PYENV_VIRTUAL_ENV})
+
+" LSP
+
+inoremap <silent><expr> <cr> pumvisible() ? coc#_select_confirm() : 
+                                           \"\<C-g>u\<CR>\<c-r>=coc#on_enter()\<CR>"
+
+inoremap <silent><expr> <TAB>
+      \ pumvisible() ? coc#_select_confirm() :
+      \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+      \ <SID>check_back_space() ? "\<TAB>" :
+      \ coc#refresh()
+
+function! s:check_back_space() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+let g:coc_snippet_next = '<tab>'
+
+if executable('pyls')
+    " pip install python-language-server
+    au User lsp_setup call lsp#register_server({
+        \ 'name': 'pyls',
+        \ 'cmd': {server_info->['pyls']},
+        \ 'allowlist': ['python'],
+        \ })
+endif
+
+nmap <silent> gd <Plug>(coc-definition)
+try
+    nmap <silent> <C-j> :call CocAction('diagnosticNext')<cr>
+    nmap <silent> <C-k> :call CocAction('diagnosticPrevious')<cr>
+endtry
+nmap <silent> <leader>rn <Plug>(coc-rename)
+
+nnoremap <silent> K :call <SID>show_documentation()<CR>
+
+function! s:show_documentation()
+  if (index(['vim','help'], &filetype) >= 0)
+    execute 'h '.expand('<cword>')
+  else
+    call CocAction('doHover')
+  endif
+endfunction
+
+
+augroup lsp_install
+    au!
+    " call s:on_lsp_buffer_enabled only for languages that has the server registered.
+    autocmd User lsp_buffer_enabled call s:on_lsp_buffer_enabled()
+augroup END
+
 " Remaps
 
-
-nmap <space> <Plug>(mkdx-checkbox-prev-n)
+nmap S v<Plug>(coc-codeaction-selected)
+nnoremap s "_d
+nnoremap Q @@
+nmap <space> za
 nnoremap <esc> :noh<return><esc>
 
 " Don't need these arrow keys
@@ -188,8 +262,6 @@ vnoremap <right> <nop>
 " B A <Start>
 
 nmap + :.!ruby -ne 'puts eval($_)'<Enter>
-nmap <silent> <C-k> <Plug>(ale_previous)
-nmap <silent> <C-j> <Plug>(ale_next)
 nmap <silent> <C-n> :put =strftime('%Y-%m-%d %H:%M:%S')<Enter>
 
 nmap g :!mimeopen <CR><CR>
@@ -289,7 +361,9 @@ hi VertSplit ctermbg=NONE
 " Autocommands
 
 au BufRead,BufNewFile *.clisp set filetype=lisp
+au BufRead,BufNewFile *.yaml,*.yml set shiftwidth=2 | set tabstop=4
 
+set conceallevel=0
 " au InsertLeave,BufWritePre *.py execute ':Black'
 augroup pythonstuff
     au!
@@ -302,6 +376,7 @@ augroup pythonstuff
     au BufRead,BufNewFile *.py,*.pyw,*.c,*.h match SpellBad /\s\+$/
 augroup END
 
+
 " augroup numbertoggle
   " au!
   " au BufEnter,WinEnter,FocusGained,InsertLeave * set relativenumber
@@ -309,6 +384,7 @@ augroup END
 " augroup END
 
 au FileType css set foldmethod=syntax
+au FileType json setlocal foldmethod=syntax
 au FileType html set foldmethod=indent
 
 au FileType rmd map <F5> :!echo<space>"require(rmarkdown);<space>render('<c-r>%')"<space>\|<space>R<space>--vanilla<Enter>
@@ -336,8 +412,8 @@ augroup markdown
                 \ setlocal tabstop=2 |
                 \ setlocal softtabstop=2 |
                 \ setlocal wrap |
-                \ setlocal showbreak=\ |
-                \ call deoplete#custom#buffer_option('auto_complete', v:false)
+                \ setlocal showbreak=\
+" \ call deoplete#custom#buffer_option('auto_complete', v:false)
 augroup END
 
 augroup raml
@@ -356,7 +432,7 @@ au FileType rmd,markdown syn region mkdCodeFold
         \ fold contains=mkdCodeFold
 
 au FileType rmd,markdown syn sync fromstart
-au FileType rmd,markdown set foldmethod=syntax
+au FileType rmd,markdown setlocal foldmethod=syntax
 au FileType rmd,markdown let g:indentLine_enabled=0
 
 au FileType haskell setlocal omnifunc=necoghc#omnifunc
@@ -382,14 +458,61 @@ endfunction
 au FileType markdown.autopdf let b:autopdf = 1
 au BufWritePost *.md call AutoPDF()
 
-function! Astyle()
+function! FormatOnSave()
     if exists('b:autoformat') && b:autoformat == 1
-        silent execute '!astyle -n ' shellescape(expand('%'), 1) 
+        silent execute '!clang-format -i ' shellescape(expand('%'), 1) 
         edit
     endif
 endfunction
 
-au BufWritePost *.c,*.h,*.java,*.cpp,*.cc,*.pde call Astyle()
+function! TabIfNotOpen(...)
+    let fname = a:1
+    let call = ''
+    if a:0 == 2
+        let fname = a:2
+        let call = a:1
+    endif
+    let bufnum=bufnr(expand(fname))
+    let winnum=bufwinnr(bufnum)
+    if winnum != -1
+        " Jump to existing split
+        exe winnum . "wincmd w"
+    else
+        " Make new split as usual
+        exe "tabnew " . fname
+    endif
+    " Execute the cursor movement command
+    exe call
+endfunction
 
-set conceallevel=0
+command! -nargs=+ CocTabIfNotOpen :call TabIfNotOpen(<f-args>)
+
+" au BufWritePost *.c,*.h,*.java,*.cpp,*.cc,*.pde call FormatOnSave()
+
+augroup javascript
+    au!
+    au FileType typescript syntax keyword typescriptFuncKeyword nextgroup=typescriptAsyncFunc,typescriptFuncName,@typescriptCallSignature conceal skipwhite skipempty function cchar=ƒ
+    au FileType javascript syntax keyword javaScriptFunction function conceal cchar=ƒ
+    au FileType javascript syntax keyword jsFunction function conceal cchar=ƒ
+    au FileType typescript,javascript highlight Conceal ctermfg=5 ctermbg=0
+    set conceallevel=1
+augroup END
+
+function! SynGroup()                                                            
+    let l:s = synID(line('.'), col('.'), 1)                                       
+    echo synIDattr(l:s, 'name') . ' -> ' . synIDattr(synIDtrans(l:s), 'name')
+endfun
+
+highlight Conceal ctermfg=5
+set concealcursor=
+let g:indent_guides_enable_on_vim_startup = 1
+let g:indent_guides_auto_colors = 0
+let g:indent_guides_guide_size = 1
+
+augroup IndentGuides
+    au!
+    au VimEnter,Colorscheme * :highlight IndentGuidesOdd ctermbg=235
+    au VimEnter,Colorscheme * :highlight IndentGuidesEven ctermbg=235
+augroup END
+
 endif
