@@ -30,8 +30,10 @@ Plug 'souffle-lang/souffle.vim'
 Plug 'psf/black', { 'branch': 'stable' }
 Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'elzr/vim-json'
+Plug 'Glench/Vim-Jinja2-Syntax'
 " Plug 'prabirshrestha/vim-lsp'
 " Plug 'mattn/vim-lsp-settings'
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 
 " Appearance
 Plug 'lyneca/wal.vim'
@@ -45,7 +47,8 @@ Plug 'tpope/vim-fugitive'
 Plug 'tpope/vim-abolish'
 Plug 'airblade/vim-gitgutter'
 Plug 'ervandew/supertab'
-Plug 'ctrlpvim/ctrlp.vim'
+Plug 'junegunn/fzf.vim'
+Plug 'junegunn/fzf'
 
 " Helpers
 Plug 'tpope/vim-surround'
@@ -119,6 +122,13 @@ set updatetime=750
 "let g:javascript_conceal_super                = "Ω"
 "let g:javascript_conceal_arrow_function       = "⇒"
 
+let g:fzf_buffers_jump = 1
+let g:fzf_action = {
+  \ 'enter': 'tab split',
+  \ 'ctrl-e': 'edit',
+  \ 'ctrl-x': 'split',
+  \ 'ctrl-v': 'vsplit' }
+
 let g:SuperTabDefaultCompletionType = "<c-n>"
 let g:deoplete#enable_at_startup = 1
 let g:NERDSpaceDelims = 1
@@ -167,6 +177,9 @@ let g:haskellmode_completion_ghc = -1
 " let b:ale_linters = ['python', 'mypy']
 " let g:ale_python_pylint_options = '--extension-pkg-whitelist=pygame'
 " let g:ale_python_mypy_options = '--strict'
+
+let g:mkdp_auto_start = 1
+
 let g:vim_markdown_folding_disabled=0
 let g:vim_markdown_conceal=0
 let g:vim_markdown_math=1
@@ -186,6 +199,8 @@ let g:coc_status_warning_sign = 'W '
 let g:surround_{char2nr('c')} = "\\\1command\1{\r}"
 
 call coc#config('python', {'pythonPath': $PYENV_VIRTUAL_ENV})
+
+nmap <C-P> :FZF<CR>
 
 " LSP
 
@@ -213,6 +228,9 @@ if executable('pyls')
         \ 'allowlist': ['python'],
         \ })
 endif
+
+nmap j gj
+nmap k gk
 
 nmap <silent> gd <Plug>(coc-definition)
 try
@@ -344,6 +362,7 @@ endfunction
 colorscheme wal 
 
 " Commands
+command! AutoPdf norm m0Goo<!-- vim: set ft=markdown.autopdf: -->'0
 command! Pdf execute "!pdf %"
 command! BgPdf silent call jobstart('pdf '.expand('%'))
 command! -nargs=1 C execute "tabnew <args>.c | vnew <args>.h | wincmd r | wincmd h"
@@ -412,7 +431,8 @@ augroup markdown
                 \ setlocal tabstop=2 |
                 \ setlocal softtabstop=2 |
                 \ setlocal wrap |
-                \ setlocal showbreak=\
+                \ setlocal showbreak=\ |
+                \ setlocal listchars="tab:> ,trail:-,nbsp:+,conceal:-"
 " \ call deoplete#custom#buffer_option('auto_complete', v:false)
 augroup END
 
@@ -485,6 +505,43 @@ function! TabIfNotOpen(...)
     exe call
 endfunction
 
+" Open markdown header list in FZF
+
+fun! s:MkdxGoToHeader(header)
+    " given a line: '  84: # Header'
+    " this will match the number 84 and move the cursor to the start of that line
+    call cursor(str2nr(get(matchlist(a:header, ' *\([0-9]\+\)'), 1, '')), 1)
+endfun
+
+fun! s:MkdxFormatHeader(key, val)
+    let text = get(a:val, 'text', '')
+    let lnum = get(a:val, 'lnum', '')
+
+    " if the text is empty or no lnum is present, return the empty string
+    if (empty(text) || empty(lnum)) | return text | endif
+
+    " We can't jump to it if we dont know the line number so that must be present in the outpt line.
+    " We also add extra padding up to 4 digits, so I hope your markdown files don't grow beyond 99.9k lines ;)
+    return repeat(' ', 4 - strlen(lnum)) . lnum . ': ' . text
+endfun
+
+fun! s:MkdxFzfQuickfixHeaders()
+    " passing 0 to mkdx#QuickfixHeaders causes it to return the list instead of opening the quickfix list
+    " this allows you to create a 'source' for fzf.
+    " first we map each item (formatted for quickfix use) using the function MkdxFormatHeader()
+    " then, we strip out any remaining empty headers.
+    let headers = filter(map(mkdx#QuickfixHeaders(0), function('<SID>MkdxFormatHeader')), 'v:val != ""')
+
+    " run the fzf function with the formatted data and as a 'sink' (action to execute on selected entry)
+    " supply the MkdxGoToHeader() function which will parse the line, extract the line number and move the cursor to it.
+    call fzf#run(fzf#wrap(
+            \ {'source': headers, 'sink': function('<SID>MkdxGoToHeader') }
+          \ ))
+endfun
+
+" finally, map it -- in this case, I mapped it to overwrite the default action for toggling quickfix (<PREFIX>I)
+nnoremap <silent> g<Leader> :call <SID>MkdxFzfQuickfixHeaders()<Cr>
+
 command! -nargs=+ CocTabIfNotOpen :call TabIfNotOpen(<f-args>)
 
 " au BufWritePost *.c,*.h,*.java,*.cpp,*.cc,*.pde call FormatOnSave()
@@ -514,5 +571,7 @@ augroup IndentGuides
     au VimEnter,Colorscheme * :highlight IndentGuidesOdd ctermbg=235
     au VimEnter,Colorscheme * :highlight IndentGuidesEven ctermbg=235
 augroup END
+
+hi CocRustChainingHint ctermfg=241
 
 endif
